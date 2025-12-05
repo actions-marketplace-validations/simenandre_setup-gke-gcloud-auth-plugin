@@ -1,4 +1,6 @@
-# `cobraz/setup-gke-gcloud-auth-plugin`
+# `simenandre/setup-gke-gcloud-auth-plugin`
+
+## ⚠️ This plugin is deprecated. See the [migration guide](#migration-guide-to-google-github-actionsget-gke-credentialsv2) for how to achieve the same using Google's own github action
 
 This GitHub Actions installs a pre-requisite for "gcloud container clusters get-credentials"
 command with a modern k8s client.
@@ -6,7 +8,7 @@ command with a modern k8s client.
 ## Quickstart
 
 ```yaml
-- uses: cobraz/setup-gke-gcloud-auth-plugin@v1
+- uses: simenandre/setup-gke-gcloud-auth-plugin@v1
 ```
 
 ### Example
@@ -35,7 +37,7 @@ jobs:
           credentials_json: ${{ secrets.GOOGLE_PROJECT_SA_KEY }}
           project_id: ${{ secrets.GOOGLE_PROJECT_ID }}
 
-      - uses: cobraz/setup-gke-gcloud-auth-plugin@v1
+      - uses: simenandre/setup-gke-gcloud-auth-plugin@v1
 
       - uses: google-github-actions/get-gke-credentials@v1
         with:
@@ -44,4 +46,42 @@ jobs:
 
       # At this point you should be able to communicate with your cluster
       - run: kubectl get pods
+```
+
+### Migration guide to [google-github-actions/get-gke-credentials@v2](https://github.com/google-github-actions/get-gke-credentials)
+
+Assuming this is your current setup using this plugin:
+
+```yaml
+- name: Authenticate to Google
+  uses: "google-github-actions/auth@v1"
+  with:
+    credentials_json: "${{ secrets.GCP_SERVICEACCOUNT_KEY }}"
+
+- uses: simenandre/setup-gke-gcloud-auth-plugin@v1
+
+- name: Authenticate to GKE cluster
+  uses: google-github-actions/get-gke-credentials@v1
+  with:
+    cluster_name: my_cluster
+    location: europe-west1-b
+```
+
+Migrating to get-gke-credentials can be done like so:
+
+```yaml
+- name: Authenticate to Google
+  uses: "google-github-actions/auth@v2"
+  with:
+    credentials_json: "${{ secrets.GCP_SERVICEACCOUNT_KEY }}"
+
+- uses: "google-github-actions/setup-gcloud@v2"
+  with:
+    install_components: "gke-gcloud-auth-plugin"
+
+- name: Authenticate to GKE cluster
+  uses: google-github-actions/get-gke-credentials@v2
+  with:
+    cluster_name: my_cluster
+    location: europe-west1-b
 ```
